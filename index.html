@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+    <script type="text/javascript" src="static/fetch-jsonp.js"></script>
+    <script type="text/javascript" src="static/xlsx.full.min.js"></script>
+    <script type="text/javascript" src="static/papaparse.min.js"></script>
+    <script type="text/javascript" src="dist/DataSetManager.js"></script>
+    <style type="text/css">
+    #dragzone {
+        left: 5px;
+        top: 40px;
+        padding: 10px;
+        font-size: 12px;
+        height: 100px;
+        line-height: 100px;
+        background: rgba(255, 255, 55, 0.8);
+        border: 1px dashed #999;
+        text-align: center;
+        font-size: 24px;
+    }
+    </style>
+</head>
+<body>
+
+<div id="dragzone">数据csv,excel文件拖放到此</div>
+
+<script type="text/javascript">
+
+var dropTargetEle = document.getElementById("dragzone");
+dropTargetEle.addEventListener("dragenter", dragHandle, false);
+dropTargetEle.addEventListener("dragover", dragHandle, false);
+dropTargetEle.addEventListener("drop", dragHandle, false);
+
+let dataSetManager = new DataSetManager();
+
+function dragHandle(event) {
+    event.preventDefault();
+    if(event.type == "drop") {
+        var files = event.dataTransfer.files;
+        var fileName = files[0].name;
+        var fr = new FileReader() ;
+
+        if (fileName.indexOf('.csv') > -1) {
+            fr.readAsText(files[0]);
+        } else {
+            fr.readAsBinaryString(files[0]);
+        }
+
+        fr.onload = function(e) {
+            var rs = e.target.result;
+            if (fileName.indexOf('.csv') > -1) {
+                dataSetManager.importCSV(rs);
+            } else {
+                dataSetManager.importXLSX(rs);
+            }
+            console.log(dataSetManager.getData());
+        }
+    }
+}
+
+
+</script>
+
+</body>
+</html>

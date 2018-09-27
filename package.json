@@ -1,0 +1,35 @@
+{
+  "name": "DataSetManager",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/DataSetManager.js",
+  "scripts": {
+    "test": "jest",
+    "prepublish": "npmrun build",
+    "build": "rollup -c"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/huiyan-fe/DataSetManager.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/huiyan-fe/DataSetManager/issues"
+  },
+  "homepage": "https://github.com/huiyan-fe/DataSetManager#readme",
+  "devDependencies": {
+    "@babel/core": "^7.1.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-es2015-rollup": "^3.0.0",
+    "jest": "^23.6.0",
+    "rollup": "^0.66.2",
+    "rollup-plugin-babel": "^4.0.3",
+    "rollup-plugin-uglify": "^6.0.0"
+  },
+  "dependencies": {
+    "fetch-jsonp": "^1.1.3",
+    "papaparse": "^4.6.0",
+    "xlsx": "^0.14.0"
+  }
+}
