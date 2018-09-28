@@ -1,18 +1,18 @@
 {
-  "name": "DataSetManager",
+  "name": "dataset-manager",
   "version": "1.0.0",
   "description": "",
   "main": "dist/DataSetManager.js",
   "scripts": {
     "test": "jest",
-    "prepublish": "npmrun build",
+    "prepublish": "npm run build",
     "build": "rollup -c"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/huiyan-fe/DataSetManager.git"
   },
-  "author": "",
+  "author": "hinikai@gmail.com",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/huiyan-fe/DataSetManager/issues"

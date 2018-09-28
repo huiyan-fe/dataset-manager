@@ -87,7 +87,7 @@
 
     class DataSetManager {
 
-        constructor() {
+        constructor(options) {
         }
 
         importCSV(csvString) {
@@ -133,12 +133,11 @@
                         coordinates: [location.lng, location.lat]
                     };
                 }
-                callback && callback(rs);
+                callback && callback(data);
             });
         }
 
         getData() {
-            
             return this.data.data;
         }
 
