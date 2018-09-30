@@ -142,7 +142,7 @@
         }
 
         getFields() {
-            return this.data.fields;
+            return this.data.meta.fields;
         }
 
     }
