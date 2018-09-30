@@ -55,8 +55,11 @@ function dragHandle(event) {
             } else {
                 dataSetManager.importXLSX(rs);
             }
-            console.log(dataSetManager.getFields());
-            console.log(dataSetManager.getData());
+            dataSetManager.geoAddressWithCount('address1', 'address2', rs=>{
+                console.log(dataSetManager.getGeoData());
+            })
+            // console.log(dataSetManager.getFields());
+            // console.log(dataSetManager.getData());
         }
     }
 }

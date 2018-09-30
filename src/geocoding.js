@@ -48,17 +48,19 @@ function getPoint(name, callback) {
     });
 }
 
-function batchGeoCoding(nameList, callback) {
+function batchGeoCoding(list, callback) {
     let geoCodingStart = new Date();
     let poiList = [];
-    poiList.length = nameList.length;
+    poiList.length = list.length;
     let cnts = 0;
     let cnte = 0;
-    nameList.map((name, index) => {
+    list.map((item, index) => {
         cnts++;
+        let {name, ...rest} = item;
         getPoint(name, (poiInfo) => {
             cnte++;
             if (poiInfo) {
+                poiInfo.params = rest;
                 poiList[index] = poiInfo;
             } else {
             }

@@ -57,16 +57,18 @@
         });
     }
 
-    function batchGeoCoding(nameList, callback) {
+    function batchGeoCoding(list, callback) {
         let poiList = [];
-        poiList.length = nameList.length;
+        poiList.length = list.length;
         let cnts = 0;
         let cnte = 0;
-        nameList.map((name, index) => {
+        list.map((item, index) => {
             cnts++;
+            let {name, ...rest} = item;
             getPoint(name, (poiInfo) => {
                 cnte++;
                 if (poiInfo) {
+                    poiInfo.params = rest;
                     poiList[index] = poiInfo;
                 }
                 if (cnte == cnts) {
@@ -112,11 +114,25 @@
             return this;
         }
 
+        geoPointWithCount(lngColumnName, latColumnName, countColumnName) {
+            let data = this.data.data;
+            for (let i = 0; i < data.length; i++) {
+                data[i].geometry = {
+                    type: 'Point',
+                    coordinates: [data[i][lngColumnName], data[i][latColumnName]]
+                };
+                data[i].count = parseFloat(data[i][countColumnName]) || 1;
+            }
+            return this;
+        }
+
         geoAddress(columnName, callback) {
             let data = this.data.data;
             console.log('geoAddress');
             batchGeoCoding(data.map((item) => {
-                return item[columnName];
+                return {
+                    name: item[columnName]
+                };
             }), (rs) => {
                 for (let i = 0; i < data.length; i++) {
                     data[i].geocoding = rs[i];
@@ -126,6 +142,30 @@
                             type: 'Point',
                             coordinates: [location.lng, location.lat]
                         };
+                    }
+                }
+                callback && callback(data);
+            });
+        }
+
+        geoAddressWithCount(addrColumnName, countColumnName, callback) {
+            let data = this.data.data;
+            console.log('geoAddress');
+            batchGeoCoding(data.map((item) => {
+                return {
+                    name: item[addrColumnName],
+                    count: item[countColumnName]
+                };
+            }), (rs) => {
+                for (let i = 0; i < data.length; i++) {
+                    data[i].geocoding = rs[i];
+                    if (data[i].geocoding && data[i].geocoding.location && data[i].geocoding.params) {
+                        let {location, params} = data[i].geocoding;
+                        data[i].geometry = {
+                            type: 'Point',
+                            coordinates: [location.lng, location.lat]
+                        };
+                        data[i].count = parseFloat(params.count) || 1;
                     }
                 }
                 callback && callback(data);
