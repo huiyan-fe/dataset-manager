@@ -79,6 +79,8 @@
     class DataSetManager {
 
         constructor(options) {
+            this.options = options || {};
+            this.data = {};
         }
 
         importCSV(csvString) {
@@ -130,8 +132,37 @@
             });
         }
 
+        /**
+         * 拷贝数据列
+         * @param {string} fromColumn 源列字段
+         * @param {string} toColumn 目标列字段
+         */
+        copyColumn(fromColumn, toColumn) {
+            if (this.data.data) {
+                this.data.data.forEach((item) => {
+                    item[toColumn] = item[fromColumn];
+                });
+            }
+            return this;
+        }
+
+        /**
+         * 返回所有数据集对象
+         * @return {array} 数据集数组
+         */
         getData() {
             return this.data.data;
+        }
+
+        /**
+         * @return {array} 返回带地理位置的数据
+         */
+        getGeoData() {
+            return this.data.data.filter((item) => {
+                if (item.geometry) {
+                    return true;
+                }
+            });
         }
 
         getFields() {
