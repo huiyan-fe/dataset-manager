@@ -44,11 +44,13 @@ export default class DataSetManager {
         }), (rs) => {
             for (let i = 0; i < data.length; i++) {
                 data[i].geocoding = rs[i];
-                let location = data[i].geocoding.location;
-                data[i].geometry = {
-                    type: 'Point',
-                    coordinates: [location.lng, location.lat]
-                };
+                if (data[i].geocoding && data[i].geocoding.location) {
+                    let location = data[i].geocoding.location;
+                    data[i].geometry = {
+                        type: 'Point',
+                        coordinates: [location.lng, location.lat]
+                    };
+                }
             }
             callback && callback(data);
         });

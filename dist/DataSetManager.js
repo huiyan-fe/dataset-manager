@@ -64,24 +64,15 @@
         let cnte = 0;
         nameList.map((name, index) => {
             cnts++;
-            try {
-                getPoint(name, (poiInfo) => {
-                    cnte++;
-                    if (poiInfo) {
-                        poiList[index] = poiInfo;
-                    } else {
-                        throw (new Error());
-                    }
-                    if (cnte == cnts) {
-                        callback && callback(poiList);
-                    }
-                });
-            } catch (error) {
+            getPoint(name, (poiInfo) => {
                 cnte++;
+                if (poiInfo) {
+                    poiList[index] = poiInfo;
+                }
                 if (cnte == cnts) {
                     callback && callback(poiList);
                 }
-            }
+            });
         });
     }
 
@@ -127,11 +118,13 @@
             }), (rs) => {
                 for (let i = 0; i < data.length; i++) {
                     data[i].geocoding = rs[i];
-                    let location = data[i].geocoding.location;
-                    data[i].geometry = {
-                        type: 'Point',
-                        coordinates: [location.lng, location.lat]
-                    };
+                    if (data[i].geocoding && data[i].geocoding.location) {
+                        let location = data[i].geocoding.location;
+                        data[i].geometry = {
+                            type: 'Point',
+                            coordinates: [location.lng, location.lat]
+                        };
+                    }
                 }
                 callback && callback(data);
             });

@@ -56,26 +56,16 @@ function batchGeoCoding(nameList, callback) {
     let cnte = 0;
     nameList.map((name, index) => {
         cnts++;
-        try {
-            getPoint(name, (poiInfo) => {
-                cnte++;
-                if (poiInfo) {
-                    poiList[index] = poiInfo;
-                } else {
-                    throw (new Error());
-                }
-                if (cnte == cnts) {
-                    let d = new Date();
-                    callback && callback(poiList);
-                }
-            });
-        } catch (error) {
+        getPoint(name, (poiInfo) => {
             cnte++;
+            if (poiInfo) {
+                poiList[index] = poiInfo;
+            } else {
+            }
             if (cnte == cnts) {
-                let d = new Date();
                 callback && callback(poiList);
             }
-        }
+        });
     });
 }
 

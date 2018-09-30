@@ -2,18 +2,23 @@ var http=require('http');
 
 window.fetchJsonpTest = window.fetch = jest.fn().mockImplementation((url) => {
     return Promise.resolve({
-        status: 0,
         ok: true,
-        result: {
-            location: {
-                lng: 108.9763607986826,
-                lat: 34.2682711990115
-            },
-            precise: 0,
-            confidence: 60,
-            comprehension: 87,
-            level: "地产小区"
+        json: () => {
+            return {
+                status: 0,
+                result: {
+                    location: {
+                        lng: 108.9763607986826,
+                        lat: 34.2682711990115
+                    },
+                    precise: 0,
+                    confidence: 60,
+                    comprehension: 87,
+                    level: "地产小区"
+                }
+            }
         }
+        
     });
 });
 
