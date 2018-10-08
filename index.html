@@ -55,7 +55,7 @@ function dragHandle(event) {
             } else {
                 dataSetManager.importXLSX(rs);
             }
-            dataSetManager.geoAddressWithCount('address1', 'address2', rs=>{
+            dataSetManager.geoAddress('address1', 'address2', rs=>{
                 console.log(dataSetManager.getGeoData());
             })
             // console.log(dataSetManager.getFields());
