@@ -141,21 +141,17 @@
               this.importCSV(csv);
               return this;
           }
+
+          /**
+           * 解析点坐标数据
+           * @param {string} lngColumnName 点坐标经度列名
+           * @param {string} latColumnName 点坐标纬度列名
+           * @param {string} countColumnName 权重列名
+           */
+
       }, {
           key: 'geoPoint',
-          value: function geoPoint(lngColumnName, latColumnName) {
-              var data = this.data.data;
-              for (var i = 0; i < data.length; i++) {
-                  data[i].geometry = {
-                      type: 'Point',
-                      coordinates: [data[i][lngColumnName], data[i][latColumnName]]
-                  };
-              }
-              return this;
-          }
-      }, {
-          key: 'geoPointWithCount',
-          value: function geoPointWithCount(lngColumnName, latColumnName, countColumnName) {
+          value: function geoPoint(lngColumnName, latColumnName, countColumnName) {
               var data = this.data.data;
               for (var i = 0; i < data.length; i++) {
                   data[i].geometry = {
@@ -166,34 +162,17 @@
               }
               return this;
           }
+
+          /**
+           * 解析点位置数据
+           * @param {string} addrColumnName 地址列名
+           * @param {string} countColumnName 权重列名
+           */
+
       }, {
           key: 'geoAddress',
-          value: function geoAddress(columnName, callback) {
+          value: function geoAddress(addrColumnName, countColumnName, callback) {
               var data = this.data.data;
-              console.log('geoAddress');
-              batchGeoCoding(data.map(function (item) {
-                  return {
-                      name: item[columnName]
-                  };
-              }), function (rs) {
-                  for (var i = 0; i < data.length; i++) {
-                      data[i].geocoding = rs[i];
-                      if (data[i].geocoding && data[i].geocoding.location) {
-                          var location = data[i].geocoding.location;
-                          data[i].geometry = {
-                              type: 'Point',
-                              coordinates: [location.lng, location.lat]
-                          };
-                      }
-                  }
-                  callback && callback(data);
-              });
-          }
-      }, {
-          key: 'geoAddressWithCount',
-          value: function geoAddressWithCount(addrColumnName, countColumnName, callback) {
-              var data = this.data.data;
-              console.log('geoAddress');
               batchGeoCoding(data.map(function (item) {
                   return {
                       name: item[addrColumnName],
@@ -217,6 +196,70 @@
                   callback && callback(data);
               });
           }
+
+          /**
+           * 解析线坐标数据
+           * @param {string} lngStartColumnName 起点坐标经度列名
+           * @param {string} latStartColumnName 起点坐标纬度列名
+           * @param {string} lngEndColumnName 终点坐标经度列名
+           * @param {string} latEndColumnName 终点坐标纬度列名
+           * @param {string} countColumnName 权重列名
+           */
+
+      }, {
+          key: 'geoLine',
+          value: function geoLine(lngStartColumnName, latStartColumnName, lngEndColumnName, latEndColumnName, countColumnName) {
+              var data = this.data.data;
+              for (var i = 0; i < data.length; i++) {
+                  data[i].geometry = {
+                      type: 'LineString',
+                      coordinates: [[data[i][lngStartColumnName], data[i][latStartColumnName]], [data[i][lngEndColumnName], data[i][latEndColumnName]]]
+                  };
+                  data[i].count = parseFloat(data[i][countColumnName]) || 1;
+              }
+              return this;
+          }
+
+          /**
+           * 解析线坐标串数据
+           * @param {string} positionColumnName 坐标字符串列名
+           * @param {string} countColumnName 权重列名
+           */
+
+      }, {
+          key: 'geoLineString',
+          value: function geoLineString(positionColumnName, countColumnName) {}
+
+          /**
+           * 解析线位置数据
+           * @param {string} startColumnName 起点位置列名
+           * @param {string} endColumnName 终点位置列名
+           * @param {string} countColumnName 权重列名
+           */
+
+      }, {
+          key: 'geoRoute',
+          value: function geoRoute(startColumnName, endColumnName, countColumnName, callback) {}
+
+          /**
+           * 解析面坐标串数据
+           * @param {string} positionColumnName 坐标字符串列名
+           * @param {string} countColumnName 权重列名
+           */
+
+      }, {
+          key: 'geoPolygon',
+          value: function geoPolygon(positionColumnName, countColumnName) {}
+
+          /**
+           * 解析面位置数据
+           * @param {string} areaColumnName 面位置列名
+           * @param {string} countColumnName 权重列名
+           */
+
+      }, {
+          key: 'geoArea',
+          value: function geoArea(areaColumnName, countColumnName, callback) {}
 
           /**
            * 拷贝数据列
