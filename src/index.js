@@ -112,7 +112,7 @@ export default class DataSetManager {
      * @param {string} countColumnName 权重列名
      */
     geoRoute(startColumnName, endColumnName, countColumnName, callback) {
-
+        
     }
 
     /**
