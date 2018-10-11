@@ -55,11 +55,11 @@ function dragHandle(event) {
             } else {
                 dataSetManager.importXLSX(rs);
             }
-            dataSetManager.geoAddress('address1', 'address2', rs=>{
-                console.log(dataSetManager.getGeoData());
-            })
+            dataSetManager.geoPolygon('geostr', 'count');
+            // dataSetManager.geoLineString('FENHAO', 'count');
+            // console.log(dataSetManager.getGeoData());
             // console.log(dataSetManager.getFields());
-            // console.log(dataSetManager.getData());
+            console.log(dataSetManager.getData());
         }
     }
 }

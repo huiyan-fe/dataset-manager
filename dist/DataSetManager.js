@@ -113,6 +113,46 @@
       });
   }
 
+  function formatLineStringCoordinates(geostring) {
+      var coordinates = [];
+      if (typeof geostring == 'string') {
+          // 去除空格
+          geostring = geostring.replace(/\s+/g, '');
+          var list = geostring.split(/,|;/);
+          for (var i = 0; i < list.length; i += 2) {
+              coordinates.push([+list[i], +list[i + 1]]);
+          }
+      } else {
+          console.error('LineString geostring type error.');
+      }
+      return coordinates;
+  }
+
+  function formatPolygonCoordinates(geostring) {
+      var coordinates = [];
+      if (typeof geostring == 'string') {
+          // 去除空格
+          geostring = geostring.replace(/\s+/g, '');
+          // support muti polygon when there is seprated land in one blockId
+          // multi polygon was concated with '|' 
+          // like '113.22,44.33,112.22,44.22,112.22,44.22|112.22,44.22 ...'
+          var borders = geostring.split('|');
+          for (var i = 0; i < borders.length; i++) {
+              var border = borders[i];
+              var coord = formatLineStringCoordinates(border);
+              coordinates.push(coord);
+          }
+      } else {
+          console.error('Polygon geostring type error.');
+      }
+      return coordinates;
+  }
+
+  var utils = {
+      formatLineStringCoordinates: formatLineStringCoordinates,
+      formatPolygonCoordinates: formatPolygonCoordinates
+  };
+
   var DataSetManager = function () {
       function DataSetManager(options) {
           classCallCheck(this, DataSetManager);
@@ -228,18 +268,17 @@
 
       }, {
           key: 'geoLineString',
-          value: function geoLineString(positionColumnName, countColumnName) {}
-
-          /**
-           * 解析线位置数据
-           * @param {string} startColumnName 起点位置列名
-           * @param {string} endColumnName 终点位置列名
-           * @param {string} countColumnName 权重列名
-           */
-
-      }, {
-          key: 'geoRoute',
-          value: function geoRoute(startColumnName, endColumnName, countColumnName, callback) {}
+          value: function geoLineString(positionColumnName, countColumnName) {
+              var data = this.data.data;
+              for (var i = 0; i < data.length; i++) {
+                  data[i].geometry = {
+                      type: 'LineString',
+                      coordinates: utils.formatLineStringCoordinates(data[i][positionColumnName])
+                  };
+                  data[i].count = parseFloat(data[i][countColumnName]) || 1;
+              }
+              return this;
+          }
 
           /**
            * 解析面坐标串数据
@@ -249,17 +288,17 @@
 
       }, {
           key: 'geoPolygon',
-          value: function geoPolygon(positionColumnName, countColumnName) {}
-
-          /**
-           * 解析面位置数据
-           * @param {string} areaColumnName 面位置列名
-           * @param {string} countColumnName 权重列名
-           */
-
-      }, {
-          key: 'geoArea',
-          value: function geoArea(areaColumnName, countColumnName, callback) {}
+          value: function geoPolygon(positionColumnName, countColumnName) {
+              var data = this.data.data;
+              for (var i = 0; i < data.length; i++) {
+                  data[i].geometry = {
+                      type: 'Polygon',
+                      coordinates: utils.formatPolygonCoordinates(data[i][positionColumnName])
+                  };
+                  data[i].count = parseFloat(data[i][countColumnName]) || 1;
+              }
+              return this;
+          }
 
           /**
            * 拷贝数据列

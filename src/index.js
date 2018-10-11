@@ -1,4 +1,5 @@
 import batchGeoCoding from './geocoding.js';
+import utils from './utils.js';
 import Papa from 'papaparse';
 import XLSX from 'xlsx';
 
@@ -102,17 +103,15 @@ export default class DataSetManager {
      * @param {string} countColumnName 权重列名
      */
     geoLineString(positionColumnName, countColumnName) {
-        
-    }
-
-    /**
-     * 解析线位置数据
-     * @param {string} startColumnName 起点位置列名
-     * @param {string} endColumnName 终点位置列名
-     * @param {string} countColumnName 权重列名
-     */
-    geoRoute(startColumnName, endColumnName, countColumnName, callback) {
-        
+        let data = this.data.data;
+        for (let i = 0; i < data.length; i++) {
+            data[i].geometry = {
+                type: 'LineString',
+                coordinates: utils.formatLineStringCoordinates(data[i][positionColumnName])
+            };
+            data[i].count = parseFloat(data[i][countColumnName]) || 1;
+        }
+        return this;
     }
 
     /**
@@ -121,16 +120,15 @@ export default class DataSetManager {
      * @param {string} countColumnName 权重列名
      */
     geoPolygon(positionColumnName, countColumnName) {
-
-    }
-
-    /**
-     * 解析面位置数据
-     * @param {string} areaColumnName 面位置列名
-     * @param {string} countColumnName 权重列名
-     */
-    geoArea(areaColumnName, countColumnName, callback) {
-
+        let data = this.data.data;
+        for (let i = 0; i < data.length; i++) {
+            data[i].geometry = {
+                type: 'Polygon',
+                coordinates: utils.formatPolygonCoordinates(data[i][positionColumnName])
+            };
+            data[i].count = parseFloat(data[i][countColumnName]) || 1;
+        }
+        return this;
     }
 
     /**

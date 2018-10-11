@@ -1,12 +1,13 @@
 {
   "name": "dataset-manager",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "",
   "main": "dist/DataSetManager.js",
   "scripts": {
     "test": "jest",
     "prepublish": "npm run build",
-    "build": "rollup -c"
+    "build": "rollup -c",
+    "dev": "rollup -c -w"
   },
   "repository": {
     "type": "git",
