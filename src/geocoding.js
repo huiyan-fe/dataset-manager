@@ -5,7 +5,7 @@ function getPoint(name, callback) {
     let ak = "49tGfOjwBKkG9zG76wgcpIbce4VZdbv6";
     let address = encodeURIComponent(name);
     // 不支持跨域，需要使用JSONP
-    let geoCodingUrl = `http://api.map.baidu.com/geocoder/v2/?address=${address}&output=json&ak=${ak}`;
+    let geoCodingUrl = `//api.map.baidu.com/geocoder/v2/?address=${address}&output=json&ak=${ak}`;
 
     if (window.fetchJsonpTest) {
         fetch = window.fetchJsonpTest;
