@@ -50,7 +50,7 @@
       var ak = "49tGfOjwBKkG9zG76wgcpIbce4VZdbv6";
       var address = encodeURIComponent(name);
       // 不支持跨域，需要使用JSONP
-      var geoCodingUrl = "http://api.map.baidu.com/geocoder/v2/?address=" + address + "&output=json&ak=" + ak + "&callback=?";
+      var geoCodingUrl = "http://api.map.baidu.com/geocoder/v2/?address=" + address + "&output=json&ak=" + ak;
 
       if (window.fetchJsonpTest) {
           fetch = window.fetchJsonpTest;
