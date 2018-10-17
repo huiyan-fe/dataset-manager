@@ -90,6 +90,56 @@
       });
   }
 
+  function getPoints(names, callback) {
+      var ak = "49tGfOjwBKkG9zG76wgcpIbce4VZdbv6";
+      var address = names.map(function (name) {
+          return encodeURIComponent(name);
+      });
+      // 不支持跨域，需要使用JSONP
+      var geoCodingUrls = address.map(function (addr) {
+          return "//api.map.baidu.com/geocoder/v2/?address=" + addr + "&output=json&ak=" + ak;
+      });
+
+      if (window.fetchJsonpTest) {
+          fetch = window.fetchJsonpTest;
+      }
+
+      Promise.all(geoCodingUrls.map(function (url, index) {
+          return fetch(url, {
+              credentials: "include",
+              // timeout: 3000,
+              // jsonpCallback: null,
+              // jsonCallbackFunction: null,
+              method: "GET",
+              headers: {
+                  Accept: "application/json"
+              }
+          }).then(function (res) {
+              if (res.ok) {
+                  return res.json();
+              } else {
+                  throw new Error('response not ok');
+              }
+          }).then(function (res) {
+              if (res && res.status == 0 && res.result) {
+                  var ret = res.result;
+                  ret['name'] = names[index];
+              } else {
+                  console.log(res);
+                  throw new Error(res);
+              }
+              return res.result;
+          }).catch(function (error) {
+              console.log("failed", error);
+              // console.log(name, "failed", error);
+              callback && callback(null);
+              // throw (error);
+          });
+      })).then(function (res) {
+          callback && callback(res);
+      });
+  }
+
   function batchGeoCoding(list, callback) {
       var poiList = [];
       poiList.length = list.length;
@@ -113,6 +163,36 @@
       });
   }
 
+  function batchGeoOdCoding(list, callback) {
+      var poiList = [];
+      poiList.length = list.length;
+      var cnts = 0;
+      var cnte = 0;
+      list.map(function (item, index) {
+          cnts++;
+          var start = item.start,
+              end = item.end,
+              rest = objectWithoutProperties(item, ["start", "end"]);
+
+          var names = [start, end];
+          getPoints(names, function (poiInfo) {
+              cnte++;
+              if (poiInfo) {
+                  var newInfo = {
+                      from: poiInfo[0],
+                      to: poiInfo[1],
+                      params: rest
+                  };
+                  poiList[index] = newInfo;
+              }
+              if (cnte == cnts) {
+                  console.log(poiList);
+                  callback && callback(poiList);
+              }
+          });
+      });
+  }
+
   function formatLineStringCoordinates(geostring) {
       var coordinates = [];
       if (typeof geostring == 'string') {
@@ -128,12 +208,32 @@
       return coordinates;
   }
 
+  function formatMultiLineStringCoordinates(geostring) {
+      var coordinates = [];
+      if (typeof geostring == 'string') {
+          // 去除空格
+          geostring = geostring.replace(/\s+/g, '');
+          // support multi linestring when there is seprated line in one geostring
+          // multi linestring was concated with '|' 
+          // like '113.22,44.33,112.22,44.22,112.22,44.22|112.22,44.22 ...'
+          var lines = geostring.split('|');
+          for (var i = 0; i < lines.length; i++) {
+              var line = lines[i];
+              var coord = formatLineStringCoordinates(line);
+              coordinates.push(coord);
+          }
+      } else {
+          console.error('MultiLineString geostring type error.');
+      }
+      return coordinates;
+  }
+
   function formatPolygonCoordinates(geostring) {
       var coordinates = [];
       if (typeof geostring == 'string') {
           // 去除空格
           geostring = geostring.replace(/\s+/g, '');
-          // support muti polygon when there is seprated land in one blockId
+          // support multi polygon when there is seprated land in one geostring
           // multi polygon was concated with '|' 
           // like '113.22,44.33,112.22,44.22,112.22,44.22|112.22,44.22 ...'
           var borders = geostring.split('|');
@@ -150,6 +250,7 @@
 
   var utils = {
       formatLineStringCoordinates: formatLineStringCoordinates,
+      formatMultiLineStringCoordinates: formatMultiLineStringCoordinates,
       formatPolygonCoordinates: formatPolygonCoordinates
   };
 
@@ -281,6 +382,63 @@
           }
 
           /**
+           * 解析线坐标串数据
+           * @param {string} positionColumnName 坐标字符串列名
+           * @param {string} countColumnName 权重列名
+           */
+
+      }, {
+          key: 'geoMultiLineString',
+          value: function geoMultiLineString(positionColumnName, countColumnName) {
+              var data = this.data.data;
+              for (var i = 0; i < data.length; i++) {
+                  data[i].geometry = {
+                      type: 'MultiLineString',
+                      coordinates: utils.formatMultiLineStringCoordinates(data[i][positionColumnName])
+                  };
+                  data[i].count = parseFloat(data[i][countColumnName]) || 1;
+              }
+              return this;
+          }
+
+          /**
+           * 解析线地址数据
+           * @param {string} fromColumnName 起点列名
+           * @param {string} fromColumnName 终点列名
+           * @param {string} countColumnName 权重列名
+           */
+
+      }, {
+          key: 'geoOd',
+          value: function geoOd(fromColumnName, toColumnName, countColumnName, callback) {
+              var data = this.data.data;
+              batchGeoOdCoding(data.map(function (item) {
+                  return {
+                      start: item[fromColumnName],
+                      end: item[toColumnName],
+                      count: item[countColumnName]
+                  };
+              }), function (rs) {
+                  for (var i = 0; i < data.length; i++) {
+                      data[i].geocoding = rs[i];
+                      if (data[i].geocoding && data[i].geocoding.from && data[i].geocoding.from.location && data[i].geocoding.to && data[i].geocoding.to.location && data[i].geocoding.params) {
+                          var _data$i$geocoding2 = data[i].geocoding,
+                              from = _data$i$geocoding2.from,
+                              to = _data$i$geocoding2.to,
+                              params = _data$i$geocoding2.params;
+
+                          data[i].geometry = {
+                              type: 'LineString',
+                              coordinates: [[from.location.lng, from.location.lat], [to.location.lng, to.location.lat]]
+                          };
+                          data[i].count = parseFloat(params.count) || 1;
+                      }
+                  }
+                  callback && callback(data);
+              });
+          }
+
+          /**
            * 解析面坐标串数据
            * @param {string} positionColumnName 坐标字符串列名
            * @param {string} countColumnName 权重列名
@@ -299,6 +457,30 @@
               }
               return this;
           }
+      }, {
+          key: 'geoBoundary',
+          value: function geoBoundary(boundaryColumnName, countColumnName, callback) {}
+          // let data = this.data.data;
+          // batchGetBoundary(data.map((item) => {
+          //     return {
+          //         name: item[boundaryColumnName],
+          //         count: item[countColumnName]
+          //     };
+          // }), (rs) => {
+          //     for (let i = 0; i < data.length; i++) {
+          //         data[i].geocoding = rs[i];
+          //         if (data[i].geocoding && data[i].geocoding.location && data[i].geocoding.params) {
+          //             let {location, params} = data[i].geocoding;
+          //             data[i].geometry = {
+          //                 type: 'Point',
+          //                 coordinates: [location.lng, location.lat]
+          //             };
+          //             data[i].count = parseFloat(params.count) || 1;
+          //         }
+          //     }
+          //     callback && callback(data);
+          // });
+
 
           /**
            * 拷贝数据列

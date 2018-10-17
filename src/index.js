@@ -1,4 +1,4 @@
-import batchGeoCoding from './geocoding.js';
+import {batchGeoCoding, batchGeoOdCoding} from './geocoding.js';
 import utils from './utils.js';
 import Papa from 'papaparse';
 import XLSX from 'xlsx';
@@ -115,6 +115,59 @@ export default class DataSetManager {
     }
 
     /**
+     * 解析线坐标串数据
+     * @param {string} positionColumnName 坐标字符串列名
+     * @param {string} countColumnName 权重列名
+     */
+    geoMultiLineString(positionColumnName, countColumnName) {
+        let data = this.data.data;
+        for (let i = 0; i < data.length; i++) {
+            data[i].geometry = {
+                type: 'MultiLineString',
+                coordinates: utils.formatMultiLineStringCoordinates(data[i][positionColumnName])
+            };
+            data[i].count = parseFloat(data[i][countColumnName]) || 1;
+        }
+        return this;
+    }
+
+    /**
+     * 解析线地址数据
+     * @param {string} fromColumnName 起点列名
+     * @param {string} fromColumnName 终点列名
+     * @param {string} countColumnName 权重列名
+     */
+    geoOd(fromColumnName, toColumnName, countColumnName, callback) {
+        let data = this.data.data;
+        batchGeoOdCoding(data.map((item) => {
+            return {
+                start: item[fromColumnName],
+                end: item[toColumnName],
+                count: item[countColumnName]
+            };
+        }), (rs) => {
+            for (let i = 0; i < data.length; i++) {
+                data[i].geocoding = rs[i];
+                if (data[i].geocoding 
+                    && data[i].geocoding.from && data[i].geocoding.from.location
+                    && data[i].geocoding.to && data[i].geocoding.to.location
+                    && data[i].geocoding.params) {
+                    let {from, to, params} = data[i].geocoding;
+                    data[i].geometry = {
+                        type: 'LineString',
+                        coordinates: [
+                            [from.location.lng, from.location.lat],
+                            [to.location.lng, to.location.lat]
+                        ]
+                    };
+                    data[i].count = parseFloat(params.count) || 1;
+                }
+            }
+            callback && callback(data);
+        });
+    }
+
+    /**
      * 解析面坐标串数据
      * @param {string} positionColumnName 坐标字符串列名
      * @param {string} countColumnName 权重列名
@@ -129,6 +182,29 @@ export default class DataSetManager {
             data[i].count = parseFloat(data[i][countColumnName]) || 1;
         }
         return this;
+    }
+
+    geoBoundary(boundaryColumnName, countColumnName, callback) {
+        // let data = this.data.data;
+        // batchGetBoundary(data.map((item) => {
+        //     return {
+        //         name: item[boundaryColumnName],
+        //         count: item[countColumnName]
+        //     };
+        // }), (rs) => {
+        //     for (let i = 0; i < data.length; i++) {
+        //         data[i].geocoding = rs[i];
+        //         if (data[i].geocoding && data[i].geocoding.location && data[i].geocoding.params) {
+        //             let {location, params} = data[i].geocoding;
+        //             data[i].geometry = {
+        //                 type: 'Point',
+        //                 coordinates: [location.lng, location.lat]
+        //             };
+        //             data[i].count = parseFloat(params.count) || 1;
+        //         }
+        //     }
+        //     callback && callback(data);
+        // });
     }
 
     /**
