@@ -190,26 +190,26 @@ export default class DataSetManager {
      * @param {string} countColumnName 权重列名
      */
     geoBoundary(boundaryColumnName, countColumnName, callback) {
-        // let data = this.data.data;
-        // batchGeoBoundaryCoding(data.map((item) => {
-        //     return {
-        //         name: item[boundaryColumnName],
-        //         count: item[countColumnName]
-        //     };
-        // }), (rs) => {
-        //     for (let i = 0; i < data.length; i++) {
-        //         data[i].geocoding = rs[i];
-        //         if (data[i].geocoding && data[i].geocoding.location && data[i].geocoding.params) {
-        //             let {location, params} = data[i].geocoding;
-        //             data[i].geometry = {
-        //                 type: 'Polygon',
-        //                 coordinates: [location.lng, location.lat]
-        //             };
-        //             data[i].count = parseFloat(params.count) || 1;
-        //         }
-        //     }
-        //     callback && callback(data);
-        // });
+        let data = this.data.data;
+        batchGeoBoundaryCoding(data.map((item) => {
+            return {
+                name: item[boundaryColumnName],
+                count: item[countColumnName]
+            };
+        }) , rs => {
+            for (let i = 0; i < data.length; i++) {
+                data[i].geocoding = rs[i];
+                if (data[i].geocoding && data[i].geocoding.bounds && data[i].geocoding.params) {
+                    let {bounds, params} = data[i].geocoding;
+                    data[i].geometry = {
+                        type: 'Polygon',
+                        coordinates: utils.formatPolygonCoordinates(bounds)
+                    };
+                    data[i].count = parseFloat(params.count) || 1;
+                }
+            }
+            callback && callback(data);
+        });
     }
 
     /**

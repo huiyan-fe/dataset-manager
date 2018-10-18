@@ -1,14 +1,16 @@
 import fetchJsonp from 'fetch-jsonp';
-let fetch = fetchJsonp;
+
+let ak = "49tGfOjwBKkG9zG76wgcpIbce4VZdbv6";
 
 function getPoint(name, callback) {
-    let ak = "49tGfOjwBKkG9zG76wgcpIbce4VZdbv6";
     let address = encodeURIComponent(name);
-    // 不支持跨域，需要使用JSONP
     let geoCodingUrl = `//api.map.baidu.com/geocoder/v2/?address=${address}&output=json&ak=${ak}`;
 
+    // 不支持跨域，需要使用JSONP
     if (window.fetchJsonpTest) {
         fetch = window.fetchJsonpTest;
+    } else {
+        fetch = fetchJsonp;
     }
 
     fetch(geoCodingUrl, {
@@ -49,17 +51,18 @@ function getPoint(name, callback) {
 }
 
 function getPoints(names, callback) {
-    let ak = "49tGfOjwBKkG9zG76wgcpIbce4VZdbv6";
     let address = names.map(name => {
         return encodeURIComponent(name);
     });
-    // 不支持跨域，需要使用JSONP
     let geoCodingUrls = address.map(addr => {
         return `//api.map.baidu.com/geocoder/v2/?address=${addr}&output=json&ak=${ak}`;
     });
 
+    // 不支持跨域，需要使用JSONP
     if (window.fetchJsonpTest) {
         fetch = window.fetchJsonpTest;
+    } else {
+        fetch = fetchJsonp;
     }
 
     Promise.all(geoCodingUrls.map((url, index) =>
@@ -98,6 +101,48 @@ function getPoints(names, callback) {
         })
     )).then(res => {
         callback && callback(res);
+    });
+}
+
+function getBounds(name, callback) {
+    let address = encodeURIComponent(name);
+    let geoCodingUrl = `//da42drxk9awgx.cfc-execute.bj.baidubce.com/map/api/getBoundary?city=${address}`;
+
+    // 使用CORS方式来跨域
+    fetch(geoCodingUrl, {
+
+        credentials: "same-origin",
+        mode: "cors",
+        // timeout: 3000,
+        // jsonpCallback: null,
+        // jsonCallbackFunction: null,
+        method: "GET",
+        headers: {
+            Accept: "application/json"
+        }
+    })
+    .then(res => {
+        if (res.ok) {
+            return res.json();
+        } else {
+            throw new Error('response not ok');
+        }
+    })
+    .then(res => {
+        if (res && res.status == 0 && res.result) {
+            let ret = res.result;
+            callback && callback(ret);
+        } else {
+            console.log(res);
+            throw (new Error(res));
+        }
+        return res;
+    })
+    .catch(error => {
+        console.log("failed", error);
+        // console.log(name, "failed", error);
+        callback && callback(null);
+        // throw (error);
     });
 }
 
@@ -153,7 +198,25 @@ function batchGeoOdCoding(list, callback) {
 }
 
 function batchGeoBoundaryCoding(list, callback) {
-    
+    let poiList = [];
+    poiList.length = list.length;
+    let cnts = 0;
+    let cnte = 0;
+    list.map((item, index) => {
+        cnts++;
+        let {name, ...rest} = item;
+        getBounds(name, (poiInfo) => {
+            cnte++;
+            if (poiInfo) {
+                poiInfo.params = rest;
+                poiList[index] = poiInfo;
+            } else {
+            }
+            if (cnte == cnts) {
+                callback && callback(poiList);
+            }
+        });
+    });
 }
 
 export {

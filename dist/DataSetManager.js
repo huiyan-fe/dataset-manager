@@ -44,16 +44,17 @@
     return target;
   };
 
-  var fetch = fetchJsonp;
+  var ak = "49tGfOjwBKkG9zG76wgcpIbce4VZdbv6";
 
   function getPoint(name, callback) {
-      var ak = "49tGfOjwBKkG9zG76wgcpIbce4VZdbv6";
       var address = encodeURIComponent(name);
-      // 不支持跨域，需要使用JSONP
       var geoCodingUrl = "//api.map.baidu.com/geocoder/v2/?address=" + address + "&output=json&ak=" + ak;
 
+      // 不支持跨域，需要使用JSONP
       if (window.fetchJsonpTest) {
           fetch = window.fetchJsonpTest;
+      } else {
+          fetch = fetchJsonp;
       }
 
       fetch(geoCodingUrl, {
@@ -91,17 +92,18 @@
   }
 
   function getPoints(names, callback) {
-      var ak = "49tGfOjwBKkG9zG76wgcpIbce4VZdbv6";
       var address = names.map(function (name) {
           return encodeURIComponent(name);
       });
-      // 不支持跨域，需要使用JSONP
       var geoCodingUrls = address.map(function (addr) {
           return "//api.map.baidu.com/geocoder/v2/?address=" + addr + "&output=json&ak=" + ak;
       });
 
+      // 不支持跨域，需要使用JSONP
       if (window.fetchJsonpTest) {
           fetch = window.fetchJsonpTest;
+      } else {
+          fetch = fetchJsonp;
       }
 
       Promise.all(geoCodingUrls.map(function (url, index) {
@@ -137,6 +139,45 @@
           });
       })).then(function (res) {
           callback && callback(res);
+      });
+  }
+
+  function getBounds(name, callback) {
+      var address = encodeURIComponent(name);
+      var geoCodingUrl = "//da42drxk9awgx.cfc-execute.bj.baidubce.com/map/api/getBoundary?city=" + address;
+
+      // 使用CORS方式来跨域
+      fetch(geoCodingUrl, {
+
+          credentials: "same-origin",
+          mode: "cors",
+          // timeout: 3000,
+          // jsonpCallback: null,
+          // jsonCallbackFunction: null,
+          method: "GET",
+          headers: {
+              Accept: "application/json"
+          }
+      }).then(function (res) {
+          if (res.ok) {
+              return res.json();
+          } else {
+              throw new Error('response not ok');
+          }
+      }).then(function (res) {
+          if (res && res.status == 0 && res.result) {
+              var ret = res.result;
+              callback && callback(ret);
+          } else {
+              console.log(res);
+              throw new Error(res);
+          }
+          return res;
+      }).catch(function (error) {
+          console.log("failed", error);
+          // console.log(name, "failed", error);
+          callback && callback(null);
+          // throw (error);
       });
   }
 
@@ -184,6 +225,29 @@
                       params: rest
                   };
                   poiList[index] = newInfo;
+              }
+              if (cnte == cnts) {
+                  callback && callback(poiList);
+              }
+          });
+      });
+  }
+
+  function batchGeoBoundaryCoding(list, callback) {
+      var poiList = [];
+      poiList.length = list.length;
+      var cnts = 0;
+      var cnte = 0;
+      list.map(function (item, index) {
+          cnts++;
+          var name = item.name,
+              rest = objectWithoutProperties(item, ["name"]);
+
+          getBounds(name, function (poiInfo) {
+              cnte++;
+              if (poiInfo) {
+                  poiInfo.params = rest;
+                  poiList[index] = poiInfo;
               }
               if (cnte == cnts) {
                   callback && callback(poiList);
@@ -465,28 +529,31 @@
 
       }, {
           key: 'geoBoundary',
-          value: function geoBoundary(boundaryColumnName, countColumnName, callback) {}
-          // let data = this.data.data;
-          // batchGeoBoundaryCoding(data.map((item) => {
-          //     return {
-          //         name: item[boundaryColumnName],
-          //         count: item[countColumnName]
-          //     };
-          // }), (rs) => {
-          //     for (let i = 0; i < data.length; i++) {
-          //         data[i].geocoding = rs[i];
-          //         if (data[i].geocoding && data[i].geocoding.location && data[i].geocoding.params) {
-          //             let {location, params} = data[i].geocoding;
-          //             data[i].geometry = {
-          //                 type: 'Polygon',
-          //                 coordinates: [location.lng, location.lat]
-          //             };
-          //             data[i].count = parseFloat(params.count) || 1;
-          //         }
-          //     }
-          //     callback && callback(data);
-          // });
+          value: function geoBoundary(boundaryColumnName, countColumnName, callback) {
+              var data = this.data.data;
+              batchGeoBoundaryCoding(data.map(function (item) {
+                  return {
+                      name: item[boundaryColumnName],
+                      count: item[countColumnName]
+                  };
+              }), function (rs) {
+                  for (var i = 0; i < data.length; i++) {
+                      data[i].geocoding = rs[i];
+                      if (data[i].geocoding && data[i].geocoding.bounds && data[i].geocoding.params) {
+                          var _data$i$geocoding3 = data[i].geocoding,
+                              bounds = _data$i$geocoding3.bounds,
+                              params = _data$i$geocoding3.params;
 
+                          data[i].geometry = {
+                              type: 'Polygon',
+                              coordinates: utils.formatPolygonCoordinates(bounds)
+                          };
+                          data[i].count = parseFloat(params.count) || 1;
+                      }
+                  }
+                  callback && callback(data);
+              });
+          }
 
           /**
            * 拷贝数据列
