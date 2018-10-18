@@ -152,7 +152,12 @@ function batchGeoOdCoding(list, callback) {
     });
 }
 
+function batchGeoBoundaryCoding(list, callback) {
+    
+}
+
 export {
     batchGeoCoding,
-    batchGeoOdCoding
+    batchGeoOdCoding,
+    batchGeoBoundaryCoding
 };

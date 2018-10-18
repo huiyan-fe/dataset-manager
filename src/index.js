@@ -1,4 +1,4 @@
-import {batchGeoCoding, batchGeoOdCoding} from './geocoding.js';
+import {batchGeoCoding, batchGeoOdCoding, batchGeoBoundaryCoding} from './geocoding.js';
 import utils from './utils.js';
 import Papa from 'papaparse';
 import XLSX from 'xlsx';
@@ -184,9 +184,14 @@ export default class DataSetManager {
         return this;
     }
 
+    /**
+     * 解析面行政区名数据
+     * @param {string} boundaryColumnName 行政区列名
+     * @param {string} countColumnName 权重列名
+     */
     geoBoundary(boundaryColumnName, countColumnName, callback) {
         // let data = this.data.data;
-        // batchGetBoundary(data.map((item) => {
+        // batchGeoBoundaryCoding(data.map((item) => {
         //     return {
         //         name: item[boundaryColumnName],
         //         count: item[countColumnName]
@@ -197,7 +202,7 @@ export default class DataSetManager {
         //         if (data[i].geocoding && data[i].geocoding.location && data[i].geocoding.params) {
         //             let {location, params} = data[i].geocoding;
         //             data[i].geometry = {
-        //                 type: 'Point',
+        //                 type: 'Polygon',
         //                 coordinates: [location.lng, location.lat]
         //             };
         //             data[i].count = parseFloat(params.count) || 1;

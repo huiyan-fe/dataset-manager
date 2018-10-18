@@ -186,7 +186,6 @@
                   poiList[index] = newInfo;
               }
               if (cnte == cnts) {
-                  console.log(poiList);
                   callback && callback(poiList);
               }
           });
@@ -457,11 +456,18 @@
               }
               return this;
           }
+
+          /**
+           * 解析面行政区名数据
+           * @param {string} boundaryColumnName 行政区列名
+           * @param {string} countColumnName 权重列名
+           */
+
       }, {
           key: 'geoBoundary',
           value: function geoBoundary(boundaryColumnName, countColumnName, callback) {}
           // let data = this.data.data;
-          // batchGetBoundary(data.map((item) => {
+          // batchGeoBoundaryCoding(data.map((item) => {
           //     return {
           //         name: item[boundaryColumnName],
           //         count: item[countColumnName]
@@ -472,7 +478,7 @@
           //         if (data[i].geocoding && data[i].geocoding.location && data[i].geocoding.params) {
           //             let {location, params} = data[i].geocoding;
           //             data[i].geometry = {
-          //                 type: 'Point',
+          //                 type: 'Polygon',
           //                 coordinates: [location.lng, location.lat]
           //             };
           //             data[i].count = parseFloat(params.count) || 1;
