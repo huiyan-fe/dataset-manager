@@ -1,6 +1,7 @@
 import fetchJsonp from 'fetch-jsonp';
 
 let ak = "49tGfOjwBKkG9zG76wgcpIbce4VZdbv6";
+let batchLimit = 100;   // 批量查询限制为100个地名
 
 function getPoint(name, callback) {
     let address = encodeURIComponent(name);
@@ -207,9 +208,9 @@ function batchGeoBoundaryCoding(list, callback) {
         let {name, ...rest} = item;
         getBounds(name, (poiInfo) => {
             cnte++;
-            if (poiInfo) {
-                poiInfo.params = rest;
-                poiList[index] = poiInfo;
+            if (poiInfo.length) {
+                poiInfo[0].params = rest;
+                poiList[index] = poiInfo[0];
             } else {
             }
             if (cnte == cnts) {
@@ -219,8 +220,42 @@ function batchGeoBoundaryCoding(list, callback) {
     });
 }
 
+function batchGeoBoundaryCodingMas(list, callback) {
+    let poiList = [];
+    poiList.length = list.length;
+    let cnts = 0;
+    let cnte = 0;
+
+    let limit = 0;
+    let tmpArr = [];    // 暂存数组，长度不超过limit
+    list.map((name, index) => {
+        tmpArr.push(name);
+        if (limit < batchLimit && limit < list.length - 1) {
+            limit += 1;
+        } else {
+            cnts++;
+            let names = tmpArr.join(',');
+            getBounds(names, (poiInfo) => {
+                cnte++;
+                if (poiInfo.length) {
+                    for (let i = 0; i < poiInfo.length; i++) {
+                        poiList[i] = poiInfo[i];
+                    }
+                }
+                if (cnte == cnts) {
+                    callback && callback(poiList);
+                }
+            });
+            // reset
+            limit = 0;
+            tmpArr.length = 0;
+        }
+    });
+}
+
 export {
     batchGeoCoding,
     batchGeoOdCoding,
-    batchGeoBoundaryCoding
+    batchGeoBoundaryCoding,
+    batchGeoBoundaryCodingMas
 };

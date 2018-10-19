@@ -1,4 +1,4 @@
-import {batchGeoCoding, batchGeoOdCoding, batchGeoBoundaryCoding} from './geocoding.js';
+import {batchGeoCoding, batchGeoOdCoding, batchGeoBoundaryCoding, batchGeoBoundaryCodingMas} from './geocoding.js';
 import utils from './utils.js';
 import Papa from 'papaparse';
 import XLSX from 'xlsx';
@@ -191,25 +191,45 @@ export default class DataSetManager {
      */
     geoBoundary(boundaryColumnName, countColumnName, callback) {
         let data = this.data.data;
-        batchGeoBoundaryCoding(data.map((item) => {
-            return {
-                name: item[boundaryColumnName],
-                count: item[countColumnName]
-            };
-        }) , rs => {
-            for (let i = 0; i < data.length; i++) {
-                data[i].geocoding = rs[i];
-                if (data[i].geocoding && data[i].geocoding.bounds && data[i].geocoding.params) {
-                    let {bounds, params} = data[i].geocoding;
-                    data[i].geometry = {
-                        type: 'Polygon',
-                        coordinates: utils.formatPolygonCoordinates(bounds)
-                    };
-                    data[i].count = parseFloat(params.count) || 1;
+        // 因为批量解析无法注入params，所以判断若没有count传入，则批量解析
+        if (!countColumnName) {
+            batchGeoBoundaryCodingMas(data.map((item) => {
+                return item[boundaryColumnName];
+            }) , rs => {
+                for (let i = 0; i < data.length; i++) {
+                    data[i].geocoding = rs[i];
+                    if (data[i].geocoding && data[i].geocoding.bounds) {
+                        let {bounds} = data[i].geocoding;
+                        data[i].geometry = {
+                            type: 'Polygon',
+                            coordinates: utils.formatPolygonCoordinates(bounds)
+                        };
+                        data[i].count = 1;
+                    }
                 }
-            }
-            callback && callback(data);
-        });
+                callback && callback(data);
+            });
+        } else {
+            batchGeoBoundaryCoding(data.map((item) => {
+                return {
+                    name: item[boundaryColumnName],
+                    count: item[countColumnName]
+                };
+            }) , rs => {
+                for (let i = 0; i < data.length; i++) {
+                    data[i].geocoding = rs[i];
+                    if (data[i].geocoding && data[i].geocoding.bounds && data[i].geocoding.params) {
+                        let {bounds, params} = data[i].geocoding;
+                        data[i].geometry = {
+                            type: 'Polygon',
+                            coordinates: utils.formatPolygonCoordinates(bounds)
+                        };
+                        data[i].count = parseFloat(params.count) || 1;
+                    }
+                }
+                callback && callback(data);
+            });
+        }
     }
 
     /**

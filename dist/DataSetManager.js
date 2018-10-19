@@ -45,6 +45,7 @@
   };
 
   var ak = "49tGfOjwBKkG9zG76wgcpIbce4VZdbv6";
+  var batchLimit = 100; // 批量查询限制为100个地名
 
   function getPoint(name, callback) {
       var address = encodeURIComponent(name);
@@ -245,14 +246,47 @@
 
           getBounds(name, function (poiInfo) {
               cnte++;
-              if (poiInfo) {
-                  poiInfo.params = rest;
-                  poiList[index] = poiInfo;
+              if (poiInfo.length) {
+                  poiInfo[0].params = rest;
+                  poiList[index] = poiInfo[0];
               }
               if (cnte == cnts) {
                   callback && callback(poiList);
               }
           });
+      });
+  }
+
+  function batchGeoBoundaryCodingMas(list, callback) {
+      var poiList = [];
+      poiList.length = list.length;
+      var cnts = 0;
+      var cnte = 0;
+
+      var limit = 0;
+      var tmpArr = []; // 暂存数组，长度不超过limit
+      list.map(function (name, index) {
+          tmpArr.push(name);
+          if (limit < batchLimit && limit < list.length - 1) {
+              limit += 1;
+          } else {
+              cnts++;
+              var names = tmpArr.join(',');
+              getBounds(names, function (poiInfo) {
+                  cnte++;
+                  if (poiInfo.length) {
+                      for (var i = 0; i < poiInfo.length; i++) {
+                          poiList[i] = poiInfo[i];
+                      }
+                  }
+                  if (cnte == cnts) {
+                      callback && callback(poiList);
+                  }
+              });
+              // reset
+              limit = 0;
+              tmpArr.length = 0;
+          }
       });
   }
 
@@ -531,28 +565,49 @@
           key: 'geoBoundary',
           value: function geoBoundary(boundaryColumnName, countColumnName, callback) {
               var data = this.data.data;
-              batchGeoBoundaryCoding(data.map(function (item) {
-                  return {
-                      name: item[boundaryColumnName],
-                      count: item[countColumnName]
-                  };
-              }), function (rs) {
-                  for (var i = 0; i < data.length; i++) {
-                      data[i].geocoding = rs[i];
-                      if (data[i].geocoding && data[i].geocoding.bounds && data[i].geocoding.params) {
-                          var _data$i$geocoding3 = data[i].geocoding,
-                              bounds = _data$i$geocoding3.bounds,
-                              params = _data$i$geocoding3.params;
+              // 因为批量解析无法注入params，所以判断若没有count传入，则批量解析
+              if (!countColumnName) {
+                  batchGeoBoundaryCodingMas(data.map(function (item) {
+                      return item[boundaryColumnName];
+                  }), function (rs) {
+                      for (var i = 0; i < data.length; i++) {
+                          data[i].geocoding = rs[i];
+                          if (data[i].geocoding && data[i].geocoding.bounds) {
+                              var bounds = data[i].geocoding.bounds;
 
-                          data[i].geometry = {
-                              type: 'Polygon',
-                              coordinates: utils.formatPolygonCoordinates(bounds)
-                          };
-                          data[i].count = parseFloat(params.count) || 1;
+                              data[i].geometry = {
+                                  type: 'Polygon',
+                                  coordinates: utils.formatPolygonCoordinates(bounds)
+                              };
+                              data[i].count = 1;
+                          }
                       }
-                  }
-                  callback && callback(data);
-              });
+                      callback && callback(data);
+                  });
+              } else {
+                  batchGeoBoundaryCoding(data.map(function (item) {
+                      return {
+                          name: item[boundaryColumnName],
+                          count: item[countColumnName]
+                      };
+                  }), function (rs) {
+                      for (var i = 0; i < data.length; i++) {
+                          data[i].geocoding = rs[i];
+                          if (data[i].geocoding && data[i].geocoding.bounds && data[i].geocoding.params) {
+                              var _data$i$geocoding3 = data[i].geocoding,
+                                  bounds = _data$i$geocoding3.bounds,
+                                  params = _data$i$geocoding3.params;
+
+                              data[i].geometry = {
+                                  type: 'Polygon',
+                                  coordinates: utils.formatPolygonCoordinates(bounds)
+                              };
+                              data[i].count = parseFloat(params.count) || 1;
+                          }
+                      }
+                      callback && callback(data);
+                  });
+              }
           }
 
           /**
