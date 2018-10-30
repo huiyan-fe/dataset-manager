@@ -357,17 +357,24 @@
 
           this.options = options || {};
           this.data = {};
+          this.csvString = "";
       }
 
       createClass(DataSetManager, [{
           key: 'importCSV',
           value: function importCSV(csvString) {
+              this.csvString = csvString;
               var csv = Papa.parse(csvString, {
                   skipEmptyLines: true,
                   header: true
               });
               this.data = csv;
               return this;
+          }
+      }, {
+          key: 'getCsvString',
+          value: function getCsvString() {
+              return this.csvString;
           }
       }, {
           key: 'importXLSX',
