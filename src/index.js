@@ -8,15 +8,21 @@ export default class DataSetManager {
     constructor(options) {
         this.options = options || {};
         this.data = {};
+        this.csvString = "";
     }
 
     importCSV(csvString) {
+        this.csvString = csvString;
         let csv = Papa.parse(csvString, {
         	skipEmptyLines: true,
             header: true
         });
         this.data = csv;
         return this;
+    }
+
+    getCsvString() {
+        return this.csvString;
     }
 
     importXLSX(binary) {
