@@ -13,12 +13,32 @@ function formatLineStringCoordinates (geostring) {
     return coordinates;
 }
 
+function formatMultiLineStringCoordinates (geostring) {
+    let coordinates = [];
+    if (typeof geostring == 'string') {
+        // 去除空格
+        geostring = geostring.replace(/\s+/g,'');
+        // support multi linestring when there is seprated line in one geostring
+        // multi linestring was concated with '|' 
+        // like '113.22,44.33,112.22,44.22,112.22,44.22|112.22,44.22 ...'
+        let lines = geostring.split('|');
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const coord = formatLineStringCoordinates(line);
+            coordinates.push(coord);
+        }
+    } else {
+        console.error('MultiLineString geostring type error.')
+    }
+    return coordinates;
+}
+
 function formatPolygonCoordinates (geostring) {
     let coordinates = [];
     if (typeof geostring == 'string') {
         // 去除空格
         geostring = geostring.replace(/\s+/g,'');
-        // support muti polygon when there is seprated land in one blockId
+        // support multi polygon when there is seprated land in one geostring
         // multi polygon was concated with '|' 
         // like '113.22,44.33,112.22,44.22,112.22,44.22|112.22,44.22 ...'
         let borders = geostring.split('|');
@@ -35,5 +55,6 @@ function formatPolygonCoordinates (geostring) {
 
 export default {
     formatLineStringCoordinates,
+    formatMultiLineStringCoordinates,
     formatPolygonCoordinates
 };

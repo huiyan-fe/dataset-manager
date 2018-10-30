@@ -55,11 +55,13 @@ function dragHandle(event) {
             } else {
                 dataSetManager.importXLSX(rs);
             }
-            dataSetManager.geoPolygon('geostr', 'count');
+            dataSetManager.geoBoundary('城市名称', '', rs => {
+                console.log(dataSetManager.getData());
+            });
             // dataSetManager.geoLineString('FENHAO', 'count');
             // console.log(dataSetManager.getGeoData());
             // console.log(dataSetManager.getFields());
-            console.log(dataSetManager.getData());
+            // console.log(dataSetManager.getData());
         }
     }
 }
