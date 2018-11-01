@@ -377,6 +377,14 @@
               return this.csvString;
           }
       }, {
+          key: 'importJSON',
+          value: function importJSON(json) {
+              console.log(json);
+              var csv = Papa.unparse(json);
+              console.log(csv);
+              this.importCSV(csv);
+          }
+      }, {
           key: 'importXLSX',
           value: function importXLSX(binary) {
               var workbook = XLSX.read(binary, {

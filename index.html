@@ -34,6 +34,9 @@ dropTargetEle.addEventListener("dragover", dragHandle, false);
 dropTargetEle.addEventListener("drop", dragHandle, false);
 
 let dataSetManager = new DataSetManager();
+dataSetManager.importJSON([{
+    'a': 1
+}]);
 
 function dragHandle(event) {
     event.preventDefault();

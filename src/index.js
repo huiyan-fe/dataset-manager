@@ -25,6 +25,13 @@ export default class DataSetManager {
         return this.csvString;
     }
 
+    importJSON(json) {
+        console.log(json);
+        let csv = Papa.unparse(json);
+        console.log(csv);
+        this.importCSV(csv);
+    }
+
     importXLSX(binary) {
         let workbook = XLSX.read(binary, {
             type: 'binary'
