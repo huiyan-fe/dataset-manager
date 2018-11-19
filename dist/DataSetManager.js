@@ -47,6 +47,8 @@
   var ak = "49tGfOjwBKkG9zG76wgcpIbce4VZdbv6";
   var batchLimit = 100; // 批量查询限制为100个地名
 
+  var fetch = window.fetch;
+
   function getPoint(name, callback) {
       var address = encodeURIComponent(name);
       var geoCodingUrl = "//api.map.baidu.com/geocoder/v2/?address=" + address + "&output=json&ak=" + ak;

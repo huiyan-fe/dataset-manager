@@ -3,6 +3,8 @@ import fetchJsonp from 'fetch-jsonp';
 let ak = "49tGfOjwBKkG9zG76wgcpIbce4VZdbv6";
 let batchLimit = 100;   // 批量查询限制为100个地名
 
+let fetch = window.fetch;
+
 function getPoint(name, callback) {
     let address = encodeURIComponent(name);
     let geoCodingUrl = `//api.map.baidu.com/geocoder/v2/?address=${address}&output=json&ak=${ak}`;
