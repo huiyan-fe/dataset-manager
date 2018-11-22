@@ -367,7 +367,7 @@
           value: function importCSV(csvString) {
               this.csvString = csvString;
               var csv = Papa.parse(csvString, {
-                  skipEmptyLines: true,
+                  skipEmptyLines: 'greedy',
                   header: true
               });
               this.data = csv;

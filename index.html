@@ -58,9 +58,11 @@ function dragHandle(event) {
             } else {
                 dataSetManager.importXLSX(rs);
             }
-            dataSetManager.geoBoundary('城市名称', '', rs => {
+            dataSetManager.geoPoint('经度', '纬度', '', rs => {
                 console.log(dataSetManager.getData());
             });
+
+                console.log(dataSetManager.getData());
             // dataSetManager.geoLineString('FENHAO', 'count');
             // console.log(dataSetManager.getGeoData());
             // console.log(dataSetManager.getFields());

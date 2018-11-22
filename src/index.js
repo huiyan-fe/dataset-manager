@@ -14,7 +14,7 @@ export default class DataSetManager {
     importCSV(csvString) {
         this.csvString = csvString;
         let csv = Papa.parse(csvString, {
-        	skipEmptyLines: true,
+        	skipEmptyLines: 'greedy',
             header: true
         });
         this.data = csv;
