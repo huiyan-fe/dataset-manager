@@ -11,6 +11,7 @@
     #dragzone {
         left: 5px;
         top: 40px;
+        margin-top: 100px;
         padding: 10px;
         font-size: 12px;
         height: 100px;
@@ -33,10 +34,17 @@ dropTargetEle.addEventListener("dragenter", dragHandle, false);
 dropTargetEle.addEventListener("dragover", dragHandle, false);
 dropTargetEle.addEventListener("drop", dragHandle, false);
 
-let dataSetManager = new DataSetManager();
+let dataSetManager = new DataSetManager({
+    onUploaded: function() {
+        console.log('onUploaded');
+        console.log(dataSetManager.getData());
+    }
+});
 dataSetManager.importJSON([{
     'a': 1
 }]);
+
+dataSetManager.addControl();
 
 function dragHandle(event) {
     event.preventDefault();

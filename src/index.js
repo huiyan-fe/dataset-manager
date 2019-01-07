@@ -282,4 +282,43 @@ export default class DataSetManager {
         return this.data.meta.fields;
     }
 
+    addControl() {
+        var dragzone = document.createElement('div');
+        dragzone.innerHTML = '数据csv,excel文件拖放到此';
+        dragzone.style.cssText = "position: absolute; left: 5px; top: 5px; padding: 10px; font-size: 12px; height: 30px; line-height: 30px; background: rgba(10, 10, 10, 0.8); border: 1px dashed rgba(255, 255, 255, 0.5); text-align: center; color: #fff;";
+
+        var dragHandle = this.dragHandle.bind(this);
+        dragzone.addEventListener("dragenter", dragHandle, false);
+        dragzone.addEventListener("dragover", dragHandle, false);
+        dragzone.addEventListener("drop", dragHandle, false);
+
+        document.body.appendChild(dragzone);
+
+    }
+
+    dragHandle() {
+        event.preventDefault();
+        if (event.type === "drop") {
+            var files = event.dataTransfer.files;
+            var fileName = files[0].name;
+            var fr = new FileReader() ;
+
+            if (fileName.indexOf('.csv') > -1) {
+                fr.readAsText(files[0]);
+            } else {
+                fr.readAsBinaryString(files[0]);
+            }
+
+            fr.onload = (e) => {
+                var rs = e.target.result;
+                if (fileName.indexOf('.csv') > -1) {
+                    this.importCSV(rs);
+                } else {
+                    this.importXLSX(rs);
+                }
+                this.options.onUploaded && this.options.onUploaded();
+            }
+        }
+    }
+
 }
