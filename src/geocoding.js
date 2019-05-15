@@ -1,13 +1,13 @@
 import fetchJsonp from 'fetch-jsonp';
 
-let ak = "49tGfOjwBKkG9zG76wgcpIbce4VZdbv6";
+let ak = "49a6b40a5317c53bf50fe94976b928b4";
 let batchLimit = 100;   // 批量查询限制为100个地名
 
 let fetch = window.fetch;
 
 function getPoint(name, callback) {
     let address = encodeURIComponent(name);
-    let geoCodingUrl = `//api.map.baidu.com/geocoder/v2/?address=${address}&output=json&ak=${ak}`;
+    let geoCodingUrl = `//api.map.baidu.com/place/v2/suggestion?query=${address}&output=json&ak=${ak}&region=全国`;
 
     // 不支持跨域，需要使用JSONP
     if (window.fetchJsonpTest) {
@@ -36,7 +36,7 @@ function getPoint(name, callback) {
     })
     .then(res => {
         if (res && res.status == 0 && res.result) {
-            let ret = res.result;
+            let ret = res.result[0];
             ret['name'] = name;
             callback && callback(ret);
         } else {
@@ -58,7 +58,7 @@ function getPoints(names, callback) {
         return encodeURIComponent(name);
     });
     let geoCodingUrls = address.map(addr => {
-        return `//api.map.baidu.com/geocoder/v2/?address=${addr}&output=json&ak=${ak}`;
+        return `//api.map.baidu.com/place/v2/suggestion?query=${addr}&output=json&ak=${ak}&region=全国`;
     });
 
     // 不支持跨域，需要使用JSONP
@@ -88,7 +88,7 @@ function getPoints(names, callback) {
         })
         .then(res => {
             if (res && res.status == 0 && res.result) {
-                let ret = res.result;
+                let ret = res.result[0];
                 ret['name'] = names[index];
             } else {
                 console.log(res);
@@ -163,7 +163,6 @@ function batchGeoCoding(list, callback) {
             if (poiInfo) {
                 poiInfo.params = rest;
                 poiList[index] = poiInfo;
-            } else {
             }
             if (cnte == cnts) {
                 callback && callback(poiList);
@@ -191,7 +190,6 @@ function batchGeoOdCoding(list, callback) {
                     params: rest
                 }
                 poiList[index] = newInfo;
-            } else {
             }
             if (cnte == cnts) {
                 callback && callback(poiList);
@@ -213,7 +211,6 @@ function batchGeoBoundaryCoding(list, callback) {
             if (poiInfo.length) {
                 poiInfo[0].params = rest;
                 poiList[index] = poiInfo[0];
-            } else {
             }
             if (cnte == cnts) {
                 callback && callback(poiList);

@@ -1,8 +1,12 @@
+/**
+ * @file 坐标转换（开发中，暂时没有使用到）
+ * @author hedongran
+ */
 import fetchJsonp from 'fetch-jsonp';
 let fetch = fetchJsonp;
 
 function getConvCoord(name, callback) {
-    let ak = "49tGfOjwBKkG9zG76wgcpIbce4VZdbv6";
+    let ak = "49a6b40a5317c53bf50fe94976b928b4";
     let coords = encodeURIComponent(name);
     // 不支持跨域，需要使用JSONP
     let geoCodingUrl = `//api.map.baidu.com/geoconv/v1/?coords=${coords}&from=${from}&to=${to}&ak=${ak}`;
