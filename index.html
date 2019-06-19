@@ -66,11 +66,11 @@ function dragHandle(event) {
             } else {
                 dataSetManager.importXLSX(rs);
             }
-            dataSetManager.geoAddress('大兴新区大兴东路55号', '', rs => {
-                console.log(dataSetManager.getData());
+            dataSetManager.geoAddress('地点名称', '', rs => {
+                console.log(dataSetManager.getGeoData());
             });
 
-                // console.log(dataSetManager.getData());
+            // console.log(dataSetManager.getData());
             // dataSetManager.geoLineString('FENHAO', 'count');
             // console.log(dataSetManager.getGeoData());
             // console.log(dataSetManager.getFields());

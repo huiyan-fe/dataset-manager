@@ -35,21 +35,18 @@ function getPoint(name, callback) {
         }
     })
     .then(res => {
-        if (res && res.status == 0 && res.result) {
+        if (res && res.status == 0 && res.result && res.result[0]) {
             let ret = res.result[0];
             ret['name'] = name;
             callback && callback(ret);
         } else {
-            console.log(res);
-            throw (new Error(res));
+            throw (new Error(`查询地址坐标失败 ${name}`));
         }
         return res;
     })
     .catch(error => {
-        console.log("failed", error);
-        // console.log(name, "failed", error);
+        console.warn("failed", error);
         callback && callback(null);
-        // throw (error);
     });
 }
 
@@ -87,20 +84,17 @@ function getPoints(names, callback) {
             }
         })
         .then(res => {
-            if (res && res.status == 0 && res.result) {
+            if (res && res.status == 0 && res.result && res.result[0]) {
                 let ret = res.result[0];
                 ret['name'] = names[index];
             } else {
-                console.log(res);
-                throw (new Error(res));
+                throw (new Error(`查询地址坐标失败 ${name}`));
             }
             return res.result;
         })
         .catch(error => {
-            console.log("failed", error);
-            // console.log(name, "failed", error);
+            console.warn("failed", error);
             callback && callback(null);
-            // throw (error);
         })
     )).then(res => {
         callback && callback(res);
@@ -136,16 +130,13 @@ function getBounds(name, callback) {
             let ret = res.result;
             callback && callback(ret);
         } else {
-            console.log(res);
-            throw (new Error(res));
+            throw (new Error(`查询地址坐标失败 ${name}`));
         }
         return res;
     })
     .catch(error => {
-        console.log("failed", error);
-        // console.log(name, "failed", error);
+        console.warn("failed", error);
         callback && callback(null);
-        // throw (error);
     });
 }
 

@@ -77,20 +77,17 @@
               throw new Error('response not ok');
           }
       }).then(function (res) {
-          if (res && res.status == 0 && res.result) {
+          if (res && res.status == 0 && res.result && res.result[0]) {
               var ret = res.result[0];
               ret['name'] = name;
               callback && callback(ret);
           } else {
-              console.log(res);
-              throw new Error(res);
+              throw new Error("\u67E5\u8BE2\u5730\u5740\u5750\u6807\u5931\u8D25 " + name);
           }
           return res;
       }).catch(function (error) {
-          console.log("failed", error);
-          // console.log(name, "failed", error);
+          console.warn("failed", error);
           callback && callback(null);
-          // throw (error);
       });
   }
 
@@ -126,19 +123,16 @@
                   throw new Error('response not ok');
               }
           }).then(function (res) {
-              if (res && res.status == 0 && res.result) {
+              if (res && res.status == 0 && res.result && res.result[0]) {
                   var ret = res.result[0];
                   ret['name'] = names[index];
               } else {
-                  console.log(res);
-                  throw new Error(res);
+                  throw new Error("\u67E5\u8BE2\u5730\u5740\u5750\u6807\u5931\u8D25 " + name);
               }
               return res.result;
           }).catch(function (error) {
-              console.log("failed", error);
-              // console.log(name, "failed", error);
+              console.warn("failed", error);
               callback && callback(null);
-              // throw (error);
           });
       })).then(function (res) {
           callback && callback(res);
@@ -172,15 +166,12 @@
               var ret = res.result;
               callback && callback(ret);
           } else {
-              console.log(res);
-              throw new Error(res);
+              throw new Error("\u67E5\u8BE2\u5730\u5740\u5750\u6807\u5931\u8D25 " + name);
           }
           return res;
       }).catch(function (error) {
-          console.log("failed", error);
-          // console.log(name, "failed", error);
+          console.warn("failed", error);
           callback && callback(null);
-          // throw (error);
       });
   }
 
