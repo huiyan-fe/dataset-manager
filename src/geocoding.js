@@ -1,13 +1,13 @@
 import fetchJsonp from 'fetch-jsonp';
 
-let ak = "49a6b40a5317c53bf50fe94976b928b4";
+let ak = "49tGfOjwBKkG9zG76wgcpIbce4VZdbv6";
 let batchLimit = 100;   // 批量查询限制为100个地名
 
 let fetch = window.fetch;
 
 function getPoint(name, callback) {
     let address = encodeURIComponent(name);
-    let geoCodingUrl = `//api.map.baidu.com/place/v2/suggestion?query=${address}&output=json&ak=${ak}&region=全国`;
+    let geoCodingUrl = `//api.map.baidu.com/geocoder/v2/?address=${address}&output=json&ak=${ak}`;
 
     // 不支持跨域，需要使用JSONP
     if (window.fetchJsonpTest) {
@@ -35,8 +35,8 @@ function getPoint(name, callback) {
         }
     })
     .then(res => {
-        if (res && res.status == 0 && res.result && res.result[0]) {
-            let ret = res.result[0];
+        if (res && res.status == 0 && res.result) {
+            let ret = res.result;
             ret['name'] = name;
             callback && callback(ret);
         } else {
@@ -55,7 +55,7 @@ function getPoints(names, callback) {
         return encodeURIComponent(name);
     });
     let geoCodingUrls = address.map(addr => {
-        return `//api.map.baidu.com/place/v2/suggestion?query=${addr}&output=json&ak=${ak}&region=全国`;
+        return `//api.map.baidu.com/geocoder/v2/?address=${addr}&output=json&ak=${ak}`;
     });
 
     // 不支持跨域，需要使用JSONP
@@ -84,8 +84,8 @@ function getPoints(names, callback) {
             }
         })
         .then(res => {
-            if (res && res.status == 0 && res.result && res.result[0]) {
-                let ret = res.result[0];
+            if (res && res.status == 0 && res.result) {
+                let ret = res.result;
                 ret['name'] = names[index];
             } else {
                 throw (new Error(`查询地址坐标失败 ${name}`));

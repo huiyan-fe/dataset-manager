@@ -44,14 +44,14 @@
     return target;
   };
 
-  var ak = "49a6b40a5317c53bf50fe94976b928b4";
+  var ak = "49tGfOjwBKkG9zG76wgcpIbce4VZdbv6";
   var batchLimit = 100; // 批量查询限制为100个地名
 
   var fetch = window.fetch;
 
   function getPoint(name, callback) {
       var address = encodeURIComponent(name);
-      var geoCodingUrl = "//api.map.baidu.com/place/v2/suggestion?query=" + address + "&output=json&ak=" + ak + "&region=\u5168\u56FD";
+      var geoCodingUrl = "//api.map.baidu.com/geocoder/v2/?address=" + address + "&output=json&ak=" + ak;
 
       // 不支持跨域，需要使用JSONP
       if (window.fetchJsonpTest) {
@@ -77,8 +77,8 @@
               throw new Error('response not ok');
           }
       }).then(function (res) {
-          if (res && res.status == 0 && res.result && res.result[0]) {
-              var ret = res.result[0];
+          if (res && res.status == 0 && res.result) {
+              var ret = res.result;
               ret['name'] = name;
               callback && callback(ret);
           } else {
@@ -96,7 +96,7 @@
           return encodeURIComponent(name);
       });
       var geoCodingUrls = address.map(function (addr) {
-          return "//api.map.baidu.com/place/v2/suggestion?query=" + addr + "&output=json&ak=" + ak + "&region=\u5168\u56FD";
+          return "//api.map.baidu.com/geocoder/v2/?address=" + addr + "&output=json&ak=" + ak;
       });
 
       // 不支持跨域，需要使用JSONP
@@ -123,8 +123,8 @@
                   throw new Error('response not ok');
               }
           }).then(function (res) {
-              if (res && res.status == 0 && res.result && res.result[0]) {
-                  var ret = res.result[0];
+              if (res && res.status == 0 && res.result) {
+                  var ret = res.result;
                   ret['name'] = names[index];
               } else {
                   throw new Error("\u67E5\u8BE2\u5730\u5740\u5750\u6807\u5931\u8D25 " + name);

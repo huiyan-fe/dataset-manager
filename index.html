@@ -66,7 +66,7 @@ function dragHandle(event) {
             } else {
                 dataSetManager.importXLSX(rs);
             }
-            dataSetManager.geoAddress('地点名称', '', rs => {
+            dataSetManager.geoAddress('城市', '', rs => {
                 console.log(dataSetManager.getGeoData());
             });
 
